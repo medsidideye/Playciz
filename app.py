@@ -1,4 +1,5 @@
 # colle ici TOUT le code Streamlit que je t’ai donné
+import matplotlib.pyplot as plt
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -298,7 +299,23 @@ if "revenue_est" in f.columns and "start_datetime" in f.columns and not f.empty:
     rev_daily = rev_daily.groupby("day")["revenue_est"].sum().reset_index()
 
     st.write("Revenu par jour")
-    st.line_chart(rev_daily.set_index("day"))
+    fig, ax = plt.subplots()
+
+    ax.plot(
+        rev_daily["day"],
+        rev_daily["revenue_est"],
+        color="green",
+        marker="o",
+        linewidth=2
+    )
+
+    ax.set_title("Revenu par jour")
+    ax.set_xlabel("Date")
+    ax.set_ylabel("€")
+
+    ax.grid(alpha=0.3)
+
+    st.pyplot(fig)
 
 # Fill rate over time (weekly)
 if "is_full_final" in f.columns and "start_datetime" in f.columns and not f.empty:
@@ -307,14 +324,42 @@ if "is_full_final" in f.columns and "start_datetime" in f.columns and not f.empt
     fill_week = fill_week.groupby("week")["is_full_final"].mean().reset_index()
 
     st.write("Taux de remplissage par semaine")
-    st.line_chart(fill_week.set_index("week"))
+    fig, ax = plt.subplots()
+
+    ax.plot(
+        fill_week["week"],
+        fill_week["is_full_final"],
+        color="orange",
+        marker="s",
+        linewidth=2
+    )
+
+    ax.set_title("Taux de remplissage par semaine")
+    ax.set_ylabel("Taux")
+
+    ax.grid(alpha=0.3)
+
+    st.pyplot(fig)
 
 st.subheader("Joueurs, Équité, Satisfaction")
 
 # Member hours per month
 if not member_hours_month.empty:
     st.write("Temps de jeu adhérents (heures-joueur) par mois")
-    st.bar_chart(member_hours_month.set_index("month"))
+    fig, ax = plt.subplots()
+
+    ax.bar(
+        member_hours_month["month"],
+        member_hours_month["member_hours"],
+        color="teal"
+    )
+
+    ax.set_title("Temps de jeu adhérents / mois")
+    ax.set_ylabel("Heures")
+
+    ax.grid(axis="y", alpha=0.3)
+
+    st.pyplot(fig)
 
 # Matches per member last 7 days (distribution)
 if {"player_id","is_member"} <= set(mp_f.columns) and not f.empty:
@@ -336,7 +381,20 @@ if "feedback_score" in mp_f.columns and "is_member" in mp_f.columns:
         sat_by_type = mp_sc.groupby("is_member")["feedback_score"].mean().reset_index()
         sat_by_type["type"] = sat_by_type["is_member"].map({1: "Member", 0: "External"})
         st.write("Satisfaction moyenne — Membres vs Externes")
-        st.bar_chart(sat_by_type.set_index("type")[["feedback_score"]])
+        fig, ax = plt.subplots()
+
+        ax.bar(
+            sat_by_type["type"],
+            sat_by_type["feedback_score"],
+            color=["green", "red"]
+        )
+
+        ax.set_title("Satisfaction : Membres vs Externes")
+        ax.set_ylabel("Score /5")
+
+        ax.grid(axis="y", alpha=0.3)
+
+        st.pyplot(fig)
 
 st.subheader("Annulations")
 
